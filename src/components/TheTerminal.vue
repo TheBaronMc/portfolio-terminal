@@ -1,20 +1,20 @@
 <template>
   <div class="column terminal">
     <div class="column">
-      <div v-for="entry in commandHistory" :key="entry">
+      <div v-for="entry in commandHistory" :key="entry.id">
         <div class="line">
-          <p class="prompt">{{ entry.prompt }}</p>
-          <p class="command">{{ entry.command }}</p>
+          <div class="prompt">{{ entry.prompt }}&nbsp;</div>
+          <div class="command">{{ entry.command }}</div>
         </div>
-        <p class="output">{{ entry.output }}</p>
+        <div class="output">{{ entry.output }}</div>
       </div>
     </div>
     <div class="line">
-      <p class="prompt">{{ prompt }}&nbsp;</p>
+      <div class="prompt">{{ prompt }}&nbsp;</div>
       <input
+        ref="input"
         class="command"
         @keydown="commandListener"
-        :value="command"
         type="text"
         id="commandInput"
         autocomplete="off"
@@ -24,16 +24,22 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'Vue';
+import { ref, onMounted, type InputHTMLAttributes } from 'vue';
 
 type HistoryEntry = {
-  command: string;
-  prompt: string;
-  output: string;
+  id: number;
+  command: string | Element | Element[];
+  prompt: string | Element | Element[];
+  output: string | Element | Element[];
 };
 const commandHistory = ref<HistoryEntry[]>([]);
 
-let command: string = '';
+const input: InputHTMLAttributes = ref(null);
+onMounted(() => {
+  input.value.focus();
+});
+
+let counter = 0;
 let prompt: string = 'portfolio$';
 
 function commandHandler(command: string): string {
@@ -42,16 +48,21 @@ function commandHandler(command: string): string {
 
 function commandListener(event: KeyboardEvent) {
   if (event.key == 'Enter') {
-    const input = event.target as HTMLInputElement;
-    command = input.value;
+    const input: HTMLInputElement = event.target as HTMLInputElement;
+    const command: string = input.value;
 
     const output: string = commandHandler(command);
 
     commandHistory.value.push({
+      id: counter,
       command,
       prompt,
       output,
     });
+    counter++;
+
+    // Reset prompt
+    input.value = '';
   }
 }
 </script>
