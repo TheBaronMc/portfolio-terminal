@@ -6,7 +6,7 @@
           <div class="prompt">{{ entry.prompt }}&nbsp;</div>
           <div class="command">{{ entry.command }}</div>
         </div>
-        <div class="output">{{ entry.output }}</div>
+        <div class="colomn output" v-html="entry.output"></div>
       </div>
     </div>
     <div class="line">
@@ -26,11 +26,14 @@
 <script setup lang="ts">
 import { ref, onMounted, type InputHTMLAttributes } from 'vue';
 
+import { type Command } from '../commands/command';
+import { help } from '../commands/help';
+
 type HistoryEntry = {
   id: number;
-  command: string | Element | Element[];
-  prompt: string | Element | Element[];
-  output: string | Element | Element[];
+  command: string;
+  prompt: string;
+  output: string;
 };
 const commandHistory = ref<HistoryEntry[]>([]);
 
@@ -42,23 +45,52 @@ onMounted(() => {
 let counter = 0;
 let prompt: string = 'portfolio$';
 
-function commandHandler(command: string): string {
-  return '';
+const commands: Command[] = [help];
+
+function commandHandler(command_name: string, params: string[]): string {
+  for (const command of commands) {
+    if (command.name == command_name) {
+      return command.execute(params);
+    }
+  }
+
+  return `Command not found ${command_name}`;
+}
+
+function format(str: string): string {
+  return str
+    .split('\n')
+    .map((s) => `<div>${s}</div>`)
+    .join('');
 }
 
 function commandListener(event: KeyboardEvent) {
   if (event.key == 'Enter') {
     const input: HTMLInputElement = event.target as HTMLInputElement;
-    const command: string = input.value;
+    const line: string = input.value;
+    const re = /(?:[^\s'"]+|'[^']*'|"[^"]*")+/g;
+    const matches = line.match(re);
 
-    const output: string = commandHandler(command);
+    if (matches) {
+      const command = matches[0];
+      const params = matches.slice(1);
 
-    commandHistory.value.push({
-      id: counter,
-      command,
-      prompt,
-      output,
-    });
+      const output: string = format(commandHandler(command, params));
+
+      commandHistory.value.push({
+        id: counter,
+        command,
+        prompt,
+        output,
+      });
+    } else {
+      commandHistory.value.push({
+        id: counter,
+        command: '',
+        prompt,
+        output: '',
+      });
+    }
     counter++;
 
     // Reset prompt
