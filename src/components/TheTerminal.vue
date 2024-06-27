@@ -3,14 +3,14 @@
     <div class="column">
       <div v-for="entry in commandHistory" :key="entry.id">
         <div class="line">
-          <div class="prompt">{{ entry.prompt }}&nbsp;</div>
+          <div class="prompt" v-html="entry.prompt"></div>
           <div class="command">{{ entry.command }}</div>
         </div>
         <div class="colomn output" v-html="entry.output"></div>
       </div>
     </div>
     <div class="line">
-      <div class="prompt">{{ prompt }}&nbsp;</div>
+      <div class="prompt" v-html="prompt"></div>
       <input
         ref="input"
         class="command"
@@ -26,6 +26,7 @@
 <script setup lang="ts">
 import { ref, onMounted, type InputHTMLAttributes } from 'vue';
 
+import { formatTextToHTML } from '../utils/format';
 import { type Command } from '../commands/command';
 import { help } from '../commands/help';
 
@@ -43,7 +44,7 @@ onMounted(() => {
 });
 
 let counter = 0;
-let prompt: string = 'portfolio$';
+let prompt: string = '<div style="color: #72BE47;">portfolio</div>$&nbsp;';
 
 const commands: Command[] = [help];
 
@@ -57,13 +58,6 @@ function commandHandler(command_name: string, params: string[]): string {
   return `Command not found ${command_name}`;
 }
 
-function format(str: string): string {
-  return str
-    .split('\n')
-    .map((s) => `<div>${s}</div>`)
-    .join('');
-}
-
 function commandListener(event: KeyboardEvent) {
   if (event.key == 'Enter') {
     const input: HTMLInputElement = event.target as HTMLInputElement;
@@ -75,7 +69,7 @@ function commandListener(event: KeyboardEvent) {
       const command = matches[0];
       const params = matches.slice(1);
 
-      const output: string = format(commandHandler(command, params));
+      const output: string = formatTextToHTML(commandHandler(command, params));
 
       commandHistory.value.push({
         id: counter,
@@ -126,6 +120,9 @@ function commandListener(event: KeyboardEvent) {
 
 .prompt {
   margin: 0;
+  
+  display: flex;
+  flex-direction: row;
 }
 
 .command {
