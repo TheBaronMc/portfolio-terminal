@@ -29,6 +29,7 @@ import { ref, onMounted, type InputHTMLAttributes } from 'vue';
 import { formatTextToHTML } from '../utils/format';
 import { type Command } from '../commands/command';
 import { help } from '../commands/help';
+import { link } from '../commands/link_sh';
 
 type HistoryEntry = {
   id: number;
@@ -46,7 +47,7 @@ onMounted(() => {
 let counter = 0;
 let prompt: string = '<div style="color: #72BE47;">portfolio</div>$&nbsp;';
 
-const commands: Command[] = [help];
+const commands: Command[] = [help, link];
 
 function commandHandler(command_name: string, params: string[]): string {
   for (const command of commands) {
@@ -93,7 +94,15 @@ function commandListener(event: KeyboardEvent) {
 }
 </script>
 
-<style scoped>
+<style>
+a {
+  color: white;
+}
+
+a:visited {
+  color: gray;
+}
+
 #commandInput {
   background-color: transparent;
   border: none;
