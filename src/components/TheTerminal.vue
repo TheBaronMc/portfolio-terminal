@@ -30,6 +30,7 @@ import { formatTextToHTML } from '../utils/format';
 import { type Command } from '../commands/command';
 import { help } from '../commands/help';
 import { link } from '../commands/link_sh';
+import { work } from '../commands/work_sh';
 
 type HistoryEntry = {
   id: number;
@@ -47,7 +48,7 @@ onMounted(() => {
 let counter = 0;
 let prompt: string = '<div style="color: #72BE47;">portfolio</div>$&nbsp;';
 
-const commands: Command[] = [help, link];
+const commands: Command[] = [help, link, work];
 
 function commandHandler(command_name: string, params: string[]): string {
   for (const command of commands) {
@@ -129,7 +130,7 @@ a:visited {
 
 .prompt {
   margin: 0;
-  
+
   display: flex;
   flex-direction: row;
 }
