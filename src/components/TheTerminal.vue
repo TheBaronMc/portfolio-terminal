@@ -28,11 +28,10 @@ import { ref, onMounted, type InputHTMLAttributes } from 'vue';
 
 import { formatTextToHTML } from '../utils/format';
 import { type Command } from '../commands/command';
-import { help } from '../commands/help';
-import { link } from '../commands/link_sh';
-import { work } from '../commands/work_sh';
-import { education } from '../commands/education_sh';
-import { skill } from '../commands/skill_sh';
+
+const props = defineProps({
+  commands: Array<Command>
+})
 
 type HistoryEntry = {
   id: number;
@@ -50,7 +49,7 @@ onMounted(() => {
 let counter = 0;
 let prompt: string = '<div style="color: #72BE47;">portfolio</div>$&nbsp;';
 
-const commands: Command[] = [help, link, work, education, skill];
+const commands: Command[] = props.commands || [];
 
 function commandHandler(command_name: string, params: string[]): string {
   for (const command of commands) {
