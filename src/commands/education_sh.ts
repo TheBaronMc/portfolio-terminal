@@ -1,7 +1,9 @@
+import { write } from '@/utils/io';
 import { type Command } from './command';
 
-function execute(_params: string[]): string {
-  return '\n\
+function execute(stdout: WritableStream, _params: string[]): number {
+  write(
+    '\n\
    \\033[#2D3347m%%%%%        %%%%       %%%%%%%%              %%         \\033[m\n\
    \\033[#2D3347m%%%%%        %%%%    %%%%%%%%%%%%            %%%%        \\033[m   \\033[#E6A439mName\\033[m     \\033[redm:\\033[m [Université Grenoble Alpes](https://www.univ-grenoble-alpes.fr/)\n\
    \\033[#2D3347m%%%%%        %%%%   %%%%%%    %             %%%%%%       \\033[m   \\033[#E6A439mDiploma\\033[m  \\033[redm:\\033[m DUT Computer Network & Telecoms\n\
@@ -24,7 +26,11 @@ function execute(_params: string[]): string {
   \\033[#2558A5m         ######          ##############      \\033[m  \n\
   \\033[#2558A5m                         ### ###### ##       \\033[m  \n\
   \\033[#2558A5m                                    ##       \\033[m  \n\
-  \\033[#2558A5m                                    ##       \\033[m  \n'
+  \\033[#2558A5m                                    ##       \\033[m  \n',
+    stdout,
+  );
+
+  return 0;
 }
 
 export const education: Command = {

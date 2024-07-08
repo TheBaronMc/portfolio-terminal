@@ -1,4 +1,4 @@
 export type Command = {
   name: string;
-  execute: (params: string[]) => string;
+  execute: (stdout: WritableStream, params: string[]) => number;
 };

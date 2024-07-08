@@ -1,7 +1,9 @@
+import { write } from '@/utils/io';
 import { type Command } from './command';
 
-function execute(_params: string[]): string {
-  return '\n\
+function execute(stdout: WritableStream, _params: string[]): number {
+  write(
+    '\n\
     \\033[#FCD15Am     .::::::::..     \\033[m \n\
     \\033[#FCD15Am   .:::::....:::::.  \\033[m          \\033[#E6A439mCompany\\033[m     \\033[redm:\\033[m [iExec](https://www.iex.ec/)\n\
     \\033[#FCD15Am .::::....    ..::::.\\033[m          \\033[#E6A439mJob Name\\033[m    \\033[redm:\\033[m Intern\n\
@@ -37,7 +39,11 @@ function execute(_params: string[]): string {
 ..\\033[#2A3343m*%=\\033[m.....\\033[#00AD9Dm-:\\033[m.....\\033[#2A3343m=%%%%%*:\\033[m...\\033[#00AD9Dm+=\\033[m..   \n\
 ...\\033[#2A3343m#%=\\033[m..........\\033[#2A3343m+%%%%%*\\033[m...\\033[#00AD9Dm:=+\\033[m...   \n\
    .\\033[#2A3343m-#%*-:\\033[m..\\033[#2A3343m:-*%%%%#+:\\033[m.\\033[#00AD9Dm:-++-\\033[m....   \n\
-   ...\\033[#2A3343m:-*#%%%#*=-\\033[m\\033[#00AD9Dm:-=+++=-\\033[m....... ';
+   ...\\033[#2A3343m:-*#%%%#*=-\\033[m\\033[#00AD9Dm:-=+++=-\\033[m....... \n',
+    stdout,
+  );
+
+  return 0;
 }
 
 export const work: Command = {

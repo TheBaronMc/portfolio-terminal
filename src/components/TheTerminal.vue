@@ -1,16 +1,8 @@
 <template>
   <div class="column terminal">
-    <div class="column">
-      <div v-for="entry in commandHistory" :key="entry.id">
-        <div class="line">
-          <div class="prompt" v-html="entry.prompt"></div>
-          <div class="command">{{ entry.command }}</div>
-        </div>
-        <div class="colomn output" v-html="entry.output"></div>
-      </div>
-    </div>
+    <div class="column" id="output"></div>
     <div class="line">
-      <div class="prompt" v-html="prompt"></div>
+      <div class="prompt" id="prompt"></div>
       <input
         ref="input"
         class="command"
@@ -28,38 +20,34 @@ import { ref, onMounted, type InputHTMLAttributes } from 'vue';
 
 import { formatTextToHTML } from '../utils/format';
 import { type Command } from '../commands/command';
-import { help } from '../commands/help';
-import { link } from '../commands/link_sh';
-import { work } from '../commands/work_sh';
-import { education } from '../commands/education_sh';
-import { skill } from '../commands/skill_sh';
+import { init_stdout, write } from '@/utils/io';
 
-type HistoryEntry = {
-  id: number;
-  command: string;
-  prompt: string;
-  output: string;
-};
-const commandHistory = ref<HistoryEntry[]>([]);
+const props = defineProps({
+  commands: Array<Command>,
+});
+
+const stdout = init_stdout();
+
+let prompt: string = '\\033[#72BE47mportfolio\\033[m$ ';
 
 const input: InputHTMLAttributes = ref(null);
 onMounted(() => {
+  formatTextToHTML(prompt).forEach((element) => {
+    document.getElementById('prompt')?.appendChild(element);
+  });
+
   input.value.focus();
 });
 
-let counter = 0;
-let prompt: string = '<div style="color: #72BE47;">portfolio</div>$&nbsp;';
-
-const commands: Command[] = [help, link, work, education, skill];
-
-function commandHandler(command_name: string, params: string[]): string {
+const commands: Command[] = props.commands || [];
+function commandHandler(command_name: string, params: string[], stdout: WritableStream) {
   for (const command of commands) {
     if (command.name == command_name) {
-      return command.execute(params);
+      command.execute(stdout, params);
+      return;
     }
   }
-
-  return `Command not found ${command_name}`;
+  write(`Command not found ${command_name}\n`, stdout);
 }
 
 function commandListener(event: KeyboardEvent) {
@@ -73,23 +61,9 @@ function commandListener(event: KeyboardEvent) {
       const command = matches[0];
       const params = matches.slice(1);
 
-      const output: string = formatTextToHTML(commandHandler(command, params));
-
-      commandHistory.value.push({
-        id: counter,
-        command,
-        prompt,
-        output,
-      });
-    } else {
-      commandHistory.value.push({
-        id: counter,
-        command: '',
-        prompt,
-        output: '',
-      });
+      write(`${prompt}${command}\n`, stdout);
+      commandHandler(command, params, stdout);
     }
-    counter++;
 
     // Reset prompt
     input.value = '';
