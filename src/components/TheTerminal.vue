@@ -23,6 +23,7 @@ import { type Command } from '../commands/command';
 import { init_stdout, write } from '@/utils/io';
 
 const props = defineProps({
+  banner: String,
   commands: Array<Command>,
 });
 
@@ -32,6 +33,12 @@ let prompt: string = '\\033[#72BE47mportfolio\\033[m$ ';
 
 const input: InputHTMLAttributes = ref(null);
 onMounted(() => {
+  if (props.banner) {
+    write(props.banner, stdout);
+  }
+
+  write('\\033[#E6A439mTip: start by executing `help` command\\033[m\n', stdout);
+
   formatTextToHTML(prompt).forEach((element) => {
     document.getElementById('prompt')?.appendChild(element);
   });
