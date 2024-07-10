@@ -6,7 +6,7 @@
       <input
         ref="input"
         class="command"
-        @keydown="commandListener"
+        @keydown="keyDownListener"
         type="text"
         id="commandInput"
         autocomplete="off"
@@ -31,6 +31,9 @@ const stdout = init_stdout();
 
 let prompt: string = '\\033[#72BE47mportfolio\\033[m$ ';
 
+let command_history_index: number = 0
+const command_history: string[] = ['']
+
 const input: InputHTMLAttributes = ref(null);
 onMounted(() => {
   if (props.banner) {
@@ -47,7 +50,7 @@ onMounted(() => {
 });
 
 const commands: Command[] = props.commands || [];
-function commandHandler(command_name: string, params: string[], stdout: WritableStream) {
+function execCommand(command_name: string, params: string[], stdout: WritableStream) {
   for (const command of commands) {
     if (command.name == command_name) {
       command.execute(stdout, params);
@@ -57,26 +60,70 @@ function commandHandler(command_name: string, params: string[], stdout: Writable
   write(`Command not found ${command_name}\n`, stdout);
 }
 
-function commandListener(event: KeyboardEvent) {
-  if (event.key == 'Enter') {
+function keyDownListener(event: KeyboardEvent) {
+  switch (event.key) {
+    case 'Enter':
+    commandHandler(event);
+      break;
+    case 'ArrowUp':
+      previousCommand(event);
+      break;
+    case 'ArrowDown':
+      nextCommand(event);
+      break;
+    default:
+      updateCurrentCommand(event);
+      break;
+  }
+}
+
+function commandHandler(event: KeyboardEvent) {  
     const input: HTMLInputElement = event.target as HTMLInputElement;
     const line: string = input.value;
     const re = /(?:[^\s'"]+|'[^']*'|"[^"]*")+/g;
     const matches = line.match(re);
 
     if (matches) {
+      write(`${prompt}${line}\n`, stdout);
+
       const command = matches[0];
       const params = matches.slice(1);
+      execCommand(command, params, stdout);
 
-      write(`${prompt}${command}\n`, stdout);
-      commandHandler(command, params, stdout);
+      command_history.push(line);
     } else {
       write(`${prompt}\n`, stdout);
     }
 
     // Reset prompt
     input.value = '';
-  }
+}
+
+function previousCommand(event: KeyboardEvent) {
+  if ((command_history_index + 1) >= command_history.length)
+    return
+
+  const input: HTMLInputElement = event.target as HTMLInputElement;
+
+  command_history_index = command_history_index + 1;
+  input.value = command_history[command_history_index];
+}
+
+function nextCommand(event: KeyboardEvent) {
+  if ((command_history_index - 1) <= 0)
+    return
+
+  const input: HTMLInputElement = event.target as HTMLInputElement;
+
+  command_history_index = command_history_index - 1;
+  input.value = command_history[command_history_index];
+}
+
+function updateCurrentCommand(event: KeyboardEvent) {
+  const input: HTMLInputElement = event.target as HTMLInputElement;
+
+  command_history[0] = input.value;
+  command_history_index = 0;
 }
 </script>
 
