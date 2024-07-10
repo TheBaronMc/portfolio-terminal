@@ -70,6 +70,8 @@ function commandListener(event: KeyboardEvent) {
 
       write(`${prompt}${command}\n`, stdout);
       commandHandler(command, params, stdout);
+    } else {
+      write(`${prompt}\n`, stdout);
     }
 
     // Reset prompt
