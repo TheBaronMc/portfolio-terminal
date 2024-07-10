@@ -57,17 +57,32 @@ app.use(
   createRouter({
     history: createWebHistory(),
     routes: [
-        { path: '/', component: LoadingPage },
-        { path: '/shell', component: TheTerminal, 
-          props: {
-            banner: getBanner() + getFakeComputerData(), 
-            commands
-          }
+      {
+        path: '/',
+        component: LoadingPage,
+        props: {
+          redirect_path: '/shell',
         },
-        { path: '/loading', component: LoadingPage },
+      },
+      {
+        path: '/shell',
+        component: TheTerminal,
+        props: {
+          banner: getBanner() + getFakeComputerData(),
+          commands,
+        },
+      },
+      {
+        path: '/loading',
+        component: LoadingPage,
+        props: {
+          redirect_path: '/shell',
+        },
+        alias: '/',
+      },
 
-        /* Default route */
-        { path: '/:pathMatch(.*)*', redirect: '/' }
+      /* Default route */
+      { path: '/:pathMatch(.*)*', redirect: '/' },
     ],
   }),
 );
