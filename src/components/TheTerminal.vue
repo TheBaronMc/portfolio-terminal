@@ -31,8 +31,8 @@ const stdout = init_stdout();
 
 let prompt: string = '\\033[#72BE47mportfolio\\033[m$ ';
 
-let command_history_index: number = 0
-const command_history: string[] = ['']
+let command_history_index: number = 0;
+const command_history: string[] = [''];
 
 const input: InputHTMLAttributes = ref(null);
 onMounted(() => {
@@ -63,7 +63,7 @@ function execCommand(command_name: string, params: string[], stdout: WritableStr
 function keyDownListener(event: KeyboardEvent) {
   switch (event.key) {
     case 'Enter':
-    commandHandler(event);
+      commandHandler(event);
       break;
     case 'ArrowUp':
       previousCommand(event);
@@ -77,53 +77,74 @@ function keyDownListener(event: KeyboardEvent) {
   }
 }
 
-function commandHandler(event: KeyboardEvent) {  
-    const input: HTMLInputElement = event.target as HTMLInputElement;
-    const line: string = input.value;
-    const re = /(?:[^\s'"]+|'[^']*'|"[^"]*")+/g;
-    const matches = line.match(re);
+function commandHandler(event: KeyboardEvent) {
+  const input: HTMLInputElement = event.target as HTMLInputElement;
+  const line: string = input.value;
+  const re = /(?:[^\s'"]+|'[^']*'|"[^"]*")+/g;
+  const matches = line.match(re);
 
-    if (matches) {
-      write(`${prompt}${line}\n`, stdout);
+  if (matches) {
+    write(`${prompt}${line}\n`, stdout);
 
-      const command = matches[0];
-      const params = matches.slice(1);
-      execCommand(command, params, stdout);
+    const command = matches[0];
+    const params = matches.slice(1);
+    execCommand(command, params, stdout);
 
-      command_history.push(line);
-    } else {
-      write(`${prompt}\n`, stdout);
-    }
+    command_history.push('');
+    command_history_index = command_history.length - 1;
+  } else {
+    write(`${prompt}\n`, stdout);
+  }
 
-    // Reset prompt
-    input.value = '';
+  // Reset prompt
+  input.value = '';
 }
 
 function previousCommand(event: KeyboardEvent) {
-  if ((command_history_index + 1) >= command_history.length)
-    return
+  function previousCommandAux(index: number, command_to_find: string) {
+    if (index >= 0) {
+      if (command_history[index].startsWith(command_to_find) && command_history[index] != command_to_find) {
+        const input: HTMLInputElement = event.target as HTMLInputElement;
 
-  const input: HTMLInputElement = event.target as HTMLInputElement;
+        command_history_index = index;
+        input.value = command_history[command_history_index];
 
-  command_history_index = command_history_index + 1;
-  input.value = command_history[command_history_index];
+        input.setSelectionRange(input.value.length, input.value.length);
+        return;
+      } else {
+        previousCommandAux(index - 1, command_to_find)
+        return;
+      }
+    }
+  }
+  return previousCommandAux(command_history_index-1, command_history[command_history.length-1])
 }
 
 function nextCommand(event: KeyboardEvent) {
-  if ((command_history_index - 1) <= 0)
-    return
+  function nextCommandAux(index: number, command_to_find: string) {
+    if (index < command_history.length) {
+      if (command_history[index].startsWith(command_to_find) && command_history[index] != command_to_find) {
+        const input: HTMLInputElement = event.target as HTMLInputElement;
 
-  const input: HTMLInputElement = event.target as HTMLInputElement;
+        command_history_index = index;
+        input.value = command_history[command_history_index];
 
-  command_history_index = command_history_index - 1;
-  input.value = command_history[command_history_index];
+        input.setSelectionRange(input.value.length, input.value.length);
+        return;
+      } else {
+        nextCommandAux(index + 1, command_to_find)
+        return;
+      }
+    }
+  }
+  return nextCommandAux(command_history_index+1, command_history[command_history.length-1])
 }
 
 function updateCurrentCommand(event: KeyboardEvent) {
   const input: HTMLInputElement = event.target as HTMLInputElement;
 
-  command_history[0] = input.value;
-  command_history_index = 0;
+  command_history_index = command_history.length - 1;
+  command_history[command_history_index] = input.value + event.key;
 }
 </script>
 
