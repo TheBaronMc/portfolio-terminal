@@ -21,6 +21,7 @@ import { ref, onMounted, type InputHTMLAttributes } from 'vue';
 import { formatTextToHTML } from '../utils/format';
 import { type Command } from '../commands/command';
 import { init_stdout, write } from '@/utils/io';
+import { History, type HistorySearchInterface } from '@/utils/history';
 
 const props = defineProps({
   banner: String,
@@ -31,8 +32,10 @@ const stdout = init_stdout();
 
 let prompt: string = '\\033[#72BE47mportfolio\\033[m$ ';
 
-let command_history_index: number = 0;
-const command_history: string[] = [''];
+const command_history = new History<string>();
+let history_search: HistorySearchInterface<string> = command_history.search((e) => false);
+let searching: boolean = false;
+let current_input: string = '';
 
 const input: InputHTMLAttributes = ref(null);
 onMounted(() => {
@@ -60,9 +63,59 @@ function execCommand(command_name: string, params: string[], stdout: WritableStr
   write(`Command not found ${command_name}\n`, stdout);
 }
 
+function addToHistory(event: KeyboardEvent) {
+  const input: HTMLInputElement = event.target as HTMLInputElement;
+  const command: string = input.value;
+
+  command_history.add_entry(command);
+
+  searching = false;
+}
+
+function getPreviousHistoryEntry(): string | undefined {
+  if (!searching) {
+    searching = true;
+    history_search = command_history.search((e) => {
+      return e.startsWith(current_input);
+    });
+  }
+
+  return history_search.previous();
+}
+
+function previousCommand(event: KeyboardEvent) {
+  const previous_entry = getPreviousHistoryEntry();
+  if (previous_entry) {
+    const input: HTMLInputElement = event.target as HTMLInputElement;
+    input.value = previous_entry;
+  }
+}
+
+function getNextHistoryEntry(): string | undefined {
+  if (!searching) {
+    return undefined;
+  }
+
+  return history_search.next();
+}
+
+function nextCommand(event: KeyboardEvent) {
+  const previous_entry = getNextHistoryEntry();
+  if (previous_entry) {
+    const input: HTMLInputElement = event.target as HTMLInputElement;
+    input.value = previous_entry;
+  }
+}
+
+function updateCurrentCommand(event: KeyboardEvent) {
+  const input: HTMLInputElement = event.target as HTMLInputElement;
+  current_input = input.value + event.key;
+}
+
 function keyDownListener(event: KeyboardEvent) {
   switch (event.key) {
     case 'Enter':
+      addToHistory(event);
       commandHandler(event);
       break;
     case 'ArrowUp':
@@ -89,62 +142,12 @@ function commandHandler(event: KeyboardEvent) {
     const command = matches[0];
     const params = matches.slice(1);
     execCommand(command, params, stdout);
-
-    command_history.push('');
-    command_history_index = command_history.length - 1;
   } else {
     write(`${prompt}\n`, stdout);
   }
 
   // Reset prompt
   input.value = '';
-}
-
-function previousCommand(event: KeyboardEvent) {
-  function previousCommandAux(index: number, command_to_find: string) {
-    if (index >= 0) {
-      if (command_history[index].startsWith(command_to_find) && command_history[index] != command_to_find) {
-        const input: HTMLInputElement = event.target as HTMLInputElement;
-
-        command_history_index = index;
-        input.value = command_history[command_history_index];
-
-        input.setSelectionRange(input.value.length, input.value.length);
-        return;
-      } else {
-        previousCommandAux(index - 1, command_to_find)
-        return;
-      }
-    }
-  }
-  return previousCommandAux(command_history_index-1, command_history[command_history.length-1])
-}
-
-function nextCommand(event: KeyboardEvent) {
-  function nextCommandAux(index: number, command_to_find: string) {
-    if (index < command_history.length) {
-      if (command_history[index].startsWith(command_to_find) && command_history[index] != command_to_find) {
-        const input: HTMLInputElement = event.target as HTMLInputElement;
-
-        command_history_index = index;
-        input.value = command_history[command_history_index];
-
-        input.setSelectionRange(input.value.length, input.value.length);
-        return;
-      } else {
-        nextCommandAux(index + 1, command_to_find)
-        return;
-      }
-    }
-  }
-  return nextCommandAux(command_history_index+1, command_history[command_history.length-1])
-}
-
-function updateCurrentCommand(event: KeyboardEvent) {
-  const input: HTMLInputElement = event.target as HTMLInputElement;
-
-  command_history_index = command_history.length - 1;
-  command_history[command_history_index] = input.value + event.key;
 }
 </script>
 
