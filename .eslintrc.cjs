@@ -14,6 +14,7 @@ module.exports = {
   },
   rules: {
     "no-unused-vars": "off",
+    "for-direction": "off",
     "@typescript-eslint/no-unused-vars": [
       "warn",
       {
