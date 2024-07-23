@@ -29,9 +29,9 @@ const remaining = ref(1);
 const style_remaining_bar = computed(() => `width: ${remaining.value * 80}%;`);
 
 onMounted(() => {
-  function charge_bar(nb_step: number, max_waiting: number) {
+  function charge_bar(nb_step: number, max_waiting: number): void {
     const delta = 1 / nb_step;
-    function charge_bar_aux(step: number, nb_step: number, max_waiting: number) {
+    function charge_bar_aux(step: number, nb_step: number, max_waiting: number): void {
       if (step <= nb_step) {
         charged.value += delta;
         remaining.value -= delta;

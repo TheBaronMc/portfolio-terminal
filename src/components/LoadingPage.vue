@@ -14,7 +14,7 @@ const props = defineProps({
   redirect_path: String,
 });
 
-function redirect() {
+function redirect(): void {
   if (props.redirect_path) {
     window.location.pathname = props.redirect_path;
   }
