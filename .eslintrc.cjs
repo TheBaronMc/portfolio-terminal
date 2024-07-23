@@ -16,7 +16,6 @@ module.exports = {
     'no-unused-vars': 'off',
     'for-direction': 'off',
     '@typescript-eslint/array-type': 'error',
-    '@typescript-eslint/await-thenable': 'error',
     '@typescript-eslint/ban-types': 'error',
     '@typescript-eslint/class-literal-property-style': 'error',
     '@typescript-eslint/consistent-generic-constructors': 'error',
@@ -24,7 +23,6 @@ module.exports = {
     '@typescript-eslint/explicit-member-accessibility': 'error',
     '@typescript-eslint/explicit-module-boundary-types': 'error',
     '@typescript-eslint/no-duplicate-enum-values': 'error',
-    '@typescript-eslint/no-duplicate-type-constituents': 'error',
     '@typescript-eslint/no-unused-vars': [
       'warn',
       {
