@@ -33,7 +33,7 @@ const stdout = init_stdout();
 let prompt: string = '\\033[#72BE47mportfolio\\033[m$ ';
 
 const command_history = new History<string>();
-let history_search: HistorySearchInterface<string> = command_history.search((e) => false);
+let history_search: HistorySearchInterface<string> = command_history.search((_) => false);
 let searching: boolean = false;
 let current_input: string = '';
 
@@ -53,7 +53,7 @@ onMounted(() => {
 });
 
 const commands: Command[] = props.commands || [];
-function execCommand(command_name: string, params: string[], stdout: WritableStream) {
+function execCommand(command_name: string, params: string[], stdout: WritableStream): void {
   for (const command of commands) {
     if (command.name == command_name) {
       command.execute(stdout, params);
@@ -63,7 +63,7 @@ function execCommand(command_name: string, params: string[], stdout: WritableStr
   write(`Command not found ${command_name}\n`, stdout);
 }
 
-function addToHistory(event: KeyboardEvent) {
+function addToHistory(event: KeyboardEvent): void {
   const input: HTMLInputElement = event.target as HTMLInputElement;
   const command: string = input.value;
 
@@ -83,7 +83,7 @@ function getPreviousHistoryEntry(): string | undefined {
   return history_search.previous();
 }
 
-function previousCommand(event: KeyboardEvent) {
+function previousCommand(event: KeyboardEvent): void {
   const previous_entry = getPreviousHistoryEntry();
   if (previous_entry) {
     const input: HTMLInputElement = event.target as HTMLInputElement;
@@ -99,7 +99,7 @@ function getNextHistoryEntry(): string | undefined {
   return history_search.next();
 }
 
-function nextCommand(event: KeyboardEvent) {
+function nextCommand(event: KeyboardEvent): void {
   const previous_entry = getNextHistoryEntry();
   if (previous_entry) {
     const input: HTMLInputElement = event.target as HTMLInputElement;
@@ -107,12 +107,12 @@ function nextCommand(event: KeyboardEvent) {
   }
 }
 
-function updateCurrentCommand(event: KeyboardEvent) {
+function updateCurrentCommand(event: KeyboardEvent): void {
   const input: HTMLInputElement = event.target as HTMLInputElement;
   current_input = input.value + event.key;
 }
 
-function keyDownListener(event: KeyboardEvent) {
+function keyDownListener(event: KeyboardEvent): void {
   switch (event.key) {
     case 'Enter':
       addToHistory(event);
@@ -130,7 +130,7 @@ function keyDownListener(event: KeyboardEvent) {
   }
 }
 
-function commandHandler(event: KeyboardEvent) {
+function commandHandler(event: KeyboardEvent): void {
   const input: HTMLInputElement = event.target as HTMLInputElement;
   const line: string = input.value;
   const re = /(?:[^\s'"]+|'[^']*'|"[^"]*")+/g;

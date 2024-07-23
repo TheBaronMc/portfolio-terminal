@@ -1,15 +1,15 @@
 export class History<T> {
-  private entries: Array<T> = new Array();
-  private searches: Array<HistorySearch<T>> = new Array();
+  private entries = new Array<T>();
+  private searches = new Array<HistorySearch<T>>();
 
-  add_entry(e: T): void {
+  public add_entry(e: T): void {
     this.entries.push(e);
     this.update_seaches(e);
 
     console.log(this.entries);
   }
 
-  search(match: (e: T) => boolean): HistorySearch<T> {
+  public search(match: (e: T) => boolean): HistorySearch<T> {
     const history_search = new HistorySearch<T>(match, this.entries);
 
     this.searches.push(history_search);
@@ -27,11 +27,12 @@ export class History<T> {
 
 export type HistorySearchInterface<T> = InstanceType<typeof HistorySearch<T>>;
 class HistorySearch<T> {
-  private match: ((e: T) => boolean) | undefined;
   private index: number = 0;
-  private entries: Array<T> = new Array<T>();
 
-  constructor(match: (e: T) => boolean, entries: Array<T>) {
+  public constructor(
+    private match: (e: T) => boolean,
+    private entries: T[],
+  ) {
     this.match = match;
     console.log(entries);
     this.entries = entries.filter(this.match);
@@ -39,7 +40,7 @@ class HistorySearch<T> {
     this.index = entries.length - 1;
   }
 
-  previous(): T | undefined {
+  public previous(): T | undefined {
     if (this.index - 1 == -1) {
       return undefined;
     }
@@ -48,7 +49,7 @@ class HistorySearch<T> {
     return this.entries[this.index];
   }
 
-  next(): T | undefined {
+  public next(): T | undefined {
     if (this.index + 1 == this.entries.length) {
       return undefined;
     }
@@ -57,7 +58,7 @@ class HistorySearch<T> {
     return this.entries[this.index];
   }
 
-  update(e: T): void {
+  public update(e: T): void {
     if (this.match && this.match(e)) {
       this.entries.push(e);
     }

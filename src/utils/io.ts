@@ -3,7 +3,7 @@ import { formatTextToHTML } from './format';
 function init_stdout(): WritableStream {
   return new WritableStream(
     {
-      write(text: string) {
+      write(text: string): Promise<void> {
         return new Promise((resolve) => {
           formatTextToHTML(text).forEach((element) => {
             document.getElementById('output')?.appendChild(element);
@@ -16,8 +16,8 @@ function init_stdout(): WritableStream {
   );
 }
 
-const streamToWriter: Map<WritableStream, WritableStreamDefaultWriter> = new Map();
-function write(text: string, stream: WritableStream) {
+const streamToWriter = new Map<WritableStream, WritableStreamDefaultWriter>();
+function write(text: string, stream: WritableStream): void {
   let writer: WritableStreamDefaultWriter | undefined = streamToWriter.get(stream);
   if (!writer) {
     writer = stream.getWriter();
