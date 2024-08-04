@@ -8,7 +8,11 @@
 </template>
 
 <script setup lang="ts">
+import { useRouter } from 'vue-router';
+
 import ProgressBar from '@/components/ProgressBar.vue';
+
+const router = useRouter();
 
 const props = defineProps({
   redirect_path: String,
@@ -16,7 +20,7 @@ const props = defineProps({
 
 function redirect(): void {
   if (props.redirect_path) {
-    window.location.pathname = props.redirect_path;
+    router.push(props.redirect_path);
   }
 }
 </script>
