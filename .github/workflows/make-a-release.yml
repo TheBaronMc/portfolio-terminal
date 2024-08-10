@@ -17,10 +17,10 @@ jobs:
       - name: Setting release type
         run: |
           name='${{ github.event.pull_request.head.ref }}'
-          if [[ $name == "epic*" ]] ;
+          if [[ $name =~ ^epic.* ]] ;
           then
                   echo "RELEASE_TYPE=major" >> $GITHUB_ENV
-          elif [[ $name == "feature*" ]] ;
+          elif [[ $name =~ ^feature.* ]] ;
           then
                   echo "RELEASE_TYPE=minor" >> $GITHUB_ENV
           else
