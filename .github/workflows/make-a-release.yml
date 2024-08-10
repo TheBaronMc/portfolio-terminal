@@ -7,7 +7,6 @@ on:
 
 jobs:
   build:
-    if: ${{ github.ref_name != 'master' }}
     runs-on: ubuntu-latest
     permissions: write-all
     steps:
