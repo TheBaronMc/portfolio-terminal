@@ -33,13 +33,9 @@ jobs:
         with:
           github_token: ${{ secrets.GH_TOKEN }}
           default_bump: ${{ env.RELEASE_TYPE }}
-      - name: Echo steps
-        run: |
-          echo '${{ toJSON(steps) }}'
-        shell: bash
       - name: Create Release
         run: |
-          gh release create ${{ steps.tag_version.outputs.new_tag}} <<< ""
+          gh release create ${{ steps.tag_version.outputs.new_tag}} --title ${{ steps.tag_version.outputs.new_tag}} <<< ""
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         shell: bash
