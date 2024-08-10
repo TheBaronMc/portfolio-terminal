@@ -1,7 +1,9 @@
 name: Make a release
 
 on:
-  push:
+  pull_request:
+    types:
+      - closed
     branches:
       - master
 
