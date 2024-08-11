@@ -25,7 +25,14 @@ function write(text: string, stream: WritableStream): void {
   }
   writer.closed;
   writer.ready.then(() => {
-    return writer.write(text);
+    writer.write(text).then(() => {
+      // Scroll down the page
+      window.scrollTo({
+        top: document.body.scrollHeight,
+        behavior: 'instant',
+      });
+    });
+    return;
   });
 }
 
