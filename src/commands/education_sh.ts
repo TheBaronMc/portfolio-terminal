@@ -1,9 +1,15 @@
-import { write } from '@/utils/io';
-import { type Command } from './command';
+import { type Command, type Context } from './command';
+import type { ReadableFileI, WritableFileI } from '@/filesystem/file';
 
-function execute(stdout: WritableStream, _params: string[]): number {
-  write(
-    '\n\
+function execute(
+  ctx: Context,
+  _stdin: ReadableFileI,
+  stdout: WritableFileI,
+  _stderr: WritableFileI,
+  _params: string[],
+): Context {
+  stdout.write(
+    ' \n\
    \\033[#2D3347m%%%%%        %%%%       %%%%%%%%              %%         \\033[m\n\
    \\033[#2D3347m%%%%%        %%%%    %%%%%%%%%%%%            %%%%        \\033[m   \\033[#E6A439mName\\033[m     \\033[redm:\\033[m [Université Grenoble Alpes](https://www.univ-grenoble-alpes.fr/)\n\
    \\033[#2D3347m%%%%%        %%%%   %%%%%%    %             %%%%%%       \\033[m   \\033[#E6A439mDiploma\\033[m  \\033[redm:\\033[m DUT Computer Network & Telecoms\n\
@@ -27,10 +33,9 @@ function execute(stdout: WritableStream, _params: string[]): number {
   \\033[#2558A5m                         ### ###### ##       \\033[m  \n\
   \\033[#2558A5m                                    ##       \\033[m  \n\
   \\033[#2558A5m                                    ##       \\033[m  \n',
-    stdout,
   );
 
-  return 0;
+  return { ...ctx, last_exit_code: 0 };
 }
 
 export const education: Command = {

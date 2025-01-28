@@ -1,9 +1,15 @@
-import { write } from '@/utils/io';
-import { type Command } from './command';
+import { type Command, type Context } from './command';
+import type { ReadableFileI, WritableFileI } from '@/filesystem/file';
 
-function execute(stdout: WritableStream, _params: string[]): number {
-  write(
-    '\n\
+function execute(
+  ctx: Context,
+  _stdin: ReadableFileI,
+  stdout: WritableFileI,
+  _stderr: WritableFileI,
+  _params: string[],
+): Context {
+  stdout.write(
+    ' \n\
     \\033[#FCD15Am     .::::::::..     \\033[m \n\
     \\033[#FCD15Am   .:::::....:::::.  \\033[m          \\033[#E6A439mCompany\\033[m     \\033[redm:\\033[m [iExec](https://www.iex.ec/)\n\
     \\033[#FCD15Am .::::....    ..::::.\\033[m          \\033[#E6A439mJob Name\\033[m    \\033[redm:\\033[m Intern\n\
@@ -40,10 +46,9 @@ function execute(stdout: WritableStream, _params: string[]): number {
 ...\\033[#2A3343m#%=\\033[m..........\\033[#2A3343m+%%%%%*\\033[m...\\033[#00AD9Dm:=+\\033[m...   \n\
    .\\033[#2A3343m-#%*-:\\033[m..\\033[#2A3343m:-*%%%%#+:\\033[m.\\033[#00AD9Dm:-++-\\033[m....   \n\
    ...\\033[#2A3343m:-*#%%%#*=-\\033[m\\033[#00AD9Dm:-=+++=-\\033[m....... \n',
-    stdout,
   );
 
-  return 0;
+  return { ...ctx, last_exit_code: 0 };
 }
 
 export const work: Command = {

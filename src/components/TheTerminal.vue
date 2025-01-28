@@ -2,152 +2,75 @@
   <div class="column terminal">
     <div class="column" id="output"></div>
     <div class="line">
-      <div class="prompt" id="prompt"></div>
-      <input
-        ref="input"
-        class="command"
-        @keydown="keyDownListener"
-        type="text"
-        id="commandInput"
-        autocomplete="off"
-      />
+      <TerminalPrompt :prompt="prompt" @exec="execCommand" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, type InputHTMLAttributes } from 'vue';
-
-import { formatTextToHTML } from '../utils/format';
-import { type Command } from '../commands/command';
-import { init_stdout, write } from '@/utils/io';
-import { History, type HistorySearchInterface } from '@/utils/history';
+import { ref, onMounted, type Ref } from 'vue';
+import { type Command, type Context } from '../commands/command';
+import { display } from '@/utils/io';
+import { getPath } from '@/filesystem/inode';
+import { Directory } from '@/filesystem/directory';
+import { OpenMode, type ReadableFileI } from '@/filesystem/file';
+import { stderr, stdout, stdin } from '@/utils/io';
+import { CommandHandler, CommandNotFound } from '@/commands/handler';
+import TerminalPrompt from './TerminalPrompt.vue';
 
 const props = defineProps({
   banner: String,
   commands: Array<Command>,
+  root: { type: Directory, default: new Directory('', []) },
+  username: { type: String, default: 'invite' },
 });
 
-const stdout = init_stdout();
-
-let prompt: string = '\\033[#72BE47mportfolio\\033[m$ ';
-
-const command_history = new History<string>();
-let history_search: HistorySearchInterface<string> = command_history.search((_) => false);
-let searching: boolean = false;
-let current_input: string = '';
-
-const input: InputHTMLAttributes = ref(null);
 onMounted(() => {
   if (props.banner) {
-    write(props.banner, stdout);
+    display(props.banner);
   }
 
-  write('\\033[#E6A439mTip: start by executing `help` command\\033[m\n', stdout);
-
-  formatTextToHTML(prompt).forEach((element) => {
-    document.getElementById('prompt')?.appendChild(element);
-  });
-
-  input.value.focus();
+  display('\\033[#E6A439mTip: start by executing `help` command\\033[m\n');
 });
 
+let execution_context: Context = {
+  username: 'guest',
+  working_directory: props.root,
+  last_exit_code: 0,
+};
+const prompt: Ref<string> = ref(
+  `\\033[#72BE47m${getPath(execution_context.working_directory)}\\033[m$ `,
+);
 const commands: Command[] = props.commands || [];
-function execCommand(command_name: string, params: string[], stdout: WritableStream): void {
-  for (const command of commands) {
-    if (command.name == command_name) {
-      command.execute(stdout, params);
-      return;
+const command_handler: CommandHandler = new CommandHandler(commands, stdin, stdout, stderr);
+function execCommand(request: { name: string; params: string[]; line: string } | null): void {
+  if (request == null) {
+    display(prompt.value);
+  } else {
+    display(prompt.value + request.line);
+
+    const command_result: Result<Context, CommandNotFound> = command_handler.exec(
+      request.name,
+      execution_context,
+      request.params,
+    );
+    if (command_result.success) {
+      execution_context = command_result.result;
+      prompt.value = `\\033[#72BE47m${getPath(execution_context.working_directory)}\\033[m$ `;
+
+      [stderr, stdout].forEach((output) => {
+        const reader: ReadableFileI = output.open(OpenMode.Read) as ReadableFileI;
+        reader.readLines().forEach((line) => display(line));
+      });
+    } else {
+      display(`Command not found: ${name}\n`);
     }
   }
-  write(`Command not found ${command_name}\n`, stdout);
-}
 
-function addToHistory(event: KeyboardEvent): void {
-  const input: HTMLInputElement = event.target as HTMLInputElement;
-  const command: string = input.value;
-
-  command_history.add_entry(command);
-
-  searching = false;
-}
-
-function getPreviousHistoryEntry(): string | undefined {
-  if (!searching) {
-    searching = true;
-    history_search = command_history.search((e) => {
-      return e.startsWith(current_input);
-    });
-  }
-
-  return history_search.previous();
-}
-
-function previousCommand(event: KeyboardEvent): void {
-  const previous_entry = getPreviousHistoryEntry();
-  if (previous_entry) {
-    const input: HTMLInputElement = event.target as HTMLInputElement;
-    input.value = previous_entry;
-  }
-}
-
-function getNextHistoryEntry(): string | undefined {
-  if (!searching) {
-    return undefined;
-  }
-
-  return history_search.next();
-}
-
-function nextCommand(event: KeyboardEvent): void {
-  const previous_entry = getNextHistoryEntry();
-  if (previous_entry) {
-    const input: HTMLInputElement = event.target as HTMLInputElement;
-    input.value = previous_entry;
-  }
-}
-
-function updateCurrentCommand(event: KeyboardEvent): void {
-  const input: HTMLInputElement = event.target as HTMLInputElement;
-  current_input = input.value + event.key;
-}
-
-function keyDownListener(event: KeyboardEvent): void {
-  switch (event.key) {
-    case 'Enter':
-      addToHistory(event);
-      commandHandler(event);
-      break;
-    case 'ArrowUp':
-      previousCommand(event);
-      break;
-    case 'ArrowDown':
-      nextCommand(event);
-      break;
-    default:
-      updateCurrentCommand(event);
-      break;
-  }
-}
-
-function commandHandler(event: KeyboardEvent): void {
-  const input: HTMLInputElement = event.target as HTMLInputElement;
-  const line: string = input.value;
-  const re = /(?:[^\s'"]+|'[^']*'|"[^"]*")+/g;
-  const matches = line.match(re);
-
-  if (matches) {
-    write(`${prompt}${line}\n`, stdout);
-
-    const command = matches[0];
-    const params = matches.slice(1);
-    execCommand(command, params, stdout);
-  } else {
-    write(`${prompt}\n`, stdout);
-  }
-
-  // Reset prompt
-  input.value = '';
+  window.scrollTo({
+    top: document.body.scrollHeight,
+    behavior: 'instant',
+  });
 }
 </script>
 

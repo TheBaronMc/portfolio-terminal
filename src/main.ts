@@ -8,14 +8,40 @@ import TheTerminal from './components/TheTerminal.vue';
 import LoadingPage from './components/LoadingPage.vue';
 
 import { type Command } from '@/commands/command';
+import { cd } from '@/commands/fs/cd';
 import { help } from '@/commands/help';
 import { link } from '@/commands/link_sh';
 import { work } from '@/commands/work_sh';
 import { education } from '@/commands/education_sh';
 import { skill } from '@/commands/skill_sh';
 import { getRandomInt } from '@/utils/random';
+import { Directory } from './filesystem/directory';
+import { File } from './filesystem/file';
+import { mkdir } from './commands/fs/mkdir';
+import { ls } from './commands/fs/ls';
+import { cat } from './commands/fs/cat';
+import { rm } from './commands/fs/rm';
+import { echo } from './commands/echo';
+import { mv } from './commands/fs/mv';
+import { rename } from './commands/fs/rename';
+import { pwd } from './commands/pwd';
 
-const commands: Command[] = [help, link, work, education, skill];
+const commands: Command[] = [
+  pwd,
+  echo,
+  cd,
+  rename,
+  mv,
+  rm,
+  cat,
+  mkdir,
+  ls,
+  help,
+  link,
+  work,
+  education,
+  skill,
+];
 
 function getBanner(): string {
   return "\\033[redm   _____ _                _          _____ _                            \\033[m\n\
@@ -52,6 +78,21 @@ function getFakeComputerData(): string {
 
 const app = createApp(App);
 
+const username: string = 'guest';
+const home_directory: Directory = new Directory('guest', [
+  new Directory('.cache', []),
+  new File('test.txt', 'toto\n toto2'),
+]);
+new Directory('', [
+  new Directory('tmp', []),
+  new Directory('bin', []),
+  new Directory('etc', []),
+  new Directory('lib', []),
+  new Directory('home', [home_directory]),
+  new Directory('var', [new Directory('log', []), new Directory('cache', [])]),
+  new Directory('dev', []),
+]);
+
 app.use(createPinia());
 app.use(
   createRouter({
@@ -70,6 +111,8 @@ app.use(
         props: {
           banner: getBanner() + getFakeComputerData(),
           commands,
+          root: home_directory,
+          username,
         },
       },
       {
