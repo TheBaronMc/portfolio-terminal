@@ -1,0 +1,33 @@
+import { Directory } from '@/filesystem/directory';
+import { type Command, type Context } from '../command';
+import { FileSystemError, findDirFromPath } from './utils';
+import type { ReadableFileI, WritableFileI } from '@/filesystem/file';
+
+function execute(
+  ctx: Context,
+  _stdin: ReadableFileI,
+  stdout: WritableFileI,
+  stderr: WritableFileI,
+  params: string[],
+): Context {
+  if (params.length == 0) {
+    stderr.write('No path specified, no effect');
+    return { ...ctx, last_exit_code: 0 };
+  }
+
+  const result: Result<Directory, FileSystemError> = findDirFromPath(
+    ctx.working_directory,
+    params[0],
+  );
+  if (result.success) {
+    return { ...ctx, working_directory: result.result, last_exit_code: 0 };
+  } else {
+    stderr.write(`Failed: ${result.error.message}`);
+    return { ...ctx, last_exit_code: 1 };
+  }
+}
+
+export const cd: Command = {
+  name: 'cd',
+  execute,
+};
