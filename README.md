@@ -1,6 +1,8 @@
-# portfolio-terminal
+# Portfolio Terminal
 
-This template should help get you started developing with Vue 3 in Vite.
+![image](https://github.com/user-attachments/assets/fdbc5851-13a6-4d70-b4d7-6ed456c0f7c2)
+
+This project is a simulation of a shell inside you browser. With some command you can access to my resume!
 
 ## Recommended IDE Setup
 

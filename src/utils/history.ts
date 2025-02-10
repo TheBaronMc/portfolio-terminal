@@ -5,8 +5,6 @@ export class History<T> {
   public add_entry(e: T): void {
     this.entries.push(e);
     this.update_seaches(e);
-
-    console.log(this.entries);
   }
 
   public search(match: (e: T) => boolean): HistorySearch<T> {
@@ -34,9 +32,7 @@ class HistorySearch<T> {
     private entries: T[],
   ) {
     this.match = match;
-    console.log(entries);
     this.entries = entries.filter(this.match);
-    console.log(this.entries);
     this.index = entries.length - 1;
   }
 

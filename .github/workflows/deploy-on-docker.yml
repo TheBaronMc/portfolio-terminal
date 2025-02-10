@@ -34,5 +34,6 @@ jobs:
           port: ${{ secrets.PORT }}
           script: |
             cd ${{ secrets.APP_FOLDER }}
+            docker compose pull
             docker compose down
             docker compose up -d
