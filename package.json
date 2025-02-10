@@ -10,11 +10,13 @@
     "build-only": "vite build",
     "type-check": "vue-tsc --build --force",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
-    "format": "prettier --write src/"
+    "format": "prettier --write src/",
+    "prepare": "husky install"
   },
   "dependencies": {
     "pinia": "^2.1.7",
-    "vue": "^3.4.29"
+    "vue": "^3.4.29",
+    "vue-router": "^4.4.0"
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.8.0",
@@ -31,6 +33,11 @@
     "prettier": "^3.2.5",
     "typescript": "~5.4.0",
     "vite": "^5.3.1",
-    "vue-tsc": "^2.0.21"
+    "vue-tsc": "^2.0.21",
+    "husky": "^8.0.0"
+  },
+  "lint-staged": {
+    "*.{vue,js,jsx,cjs,mjs,ts,tsx,cts,mts}": "eslint --cache --fix",
+    "*.{vue,ts,js,css,md}": "prettier --write"
   }
 }
